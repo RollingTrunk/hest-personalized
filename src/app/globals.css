@@ -8,7 +8,7 @@
 }
 
 :root {
-  --background: #fff;
+  --background: #f0efee;
   --foreground: #1a1a1a;
   --muted: #737373;
   --border: #e5e5e5;
@@ -17,6 +17,20 @@
   --accent-hover: #d9480f;
   --accent-subtle: #fff4e6;
   --surface: #fafafa;
+  --logo-text: #a45848;
+}
+
+.dark {
+  --background: #232121;
+  --foreground: #efe6de;
+  --muted: #9b8a81;
+  --border: #38251e;
+  --border-light: #2c1d17;
+  --accent: #ff8c42;
+  --accent-hover: #ffaa73;
+  --accent-subtle: #190f0b;
+  --surface: #241814;
+  --logo-text: #a45848;
 }
 
 * {

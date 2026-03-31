@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Audiowide } from 'next/font/google';
 import { FaInstagram, FaThreads, FaTiktok } from 'react-icons/fa6';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const audiowide = Audiowide({
   weight: '400',
@@ -26,26 +27,30 @@ export default function HouseholdLayout({
           padding: '0 24px',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          justifyContent: 'space-between',
         }}>
-          <Image
-            src="/hest.svg"
-            alt="Hest"
-            width={28}
-            height={28}
-            style={{ display: 'block' }}
-          />
-          <span 
-            className={audiowide.className}
-            style={{
-              fontSize: '1.25rem', // Slightly larger to match the icon presence
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-              marginTop: '4px', // Visual nudge down to perfectly optical-center alongside the 28px icon
-            }}
-          >
-            HEST
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Image
+              src="/hest-scheme-adaptive.png"
+              alt="Hest"
+              width={28}
+              height={28}
+              style={{ display: 'block' }}
+            />
+            <span 
+              className={audiowide.className}
+              style={{
+                fontSize: '1.25rem', // Slightly larger to match the icon presence
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                marginTop: '8px', // Visual nudge down to perfectly optical-center alongside the 28px icon
+                color: 'var(--logo-text)',
+              }}
+            >
+              HEST
+            </span>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -73,7 +78,7 @@ export default function HouseholdLayout({
           textAlign: 'center',
         }}>
           <Image
-            src="/hest.svg"
+            src="/hest-scheme-adaptive.png"
             alt="Hest"
             width={48}
             height={48}
