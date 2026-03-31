@@ -62,7 +62,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["lib/logger.ts", "functions/**/*.{ts,tsx,js,jsx}", "netlify/functions/**/*.{ts,tsx,js,jsx}"],
+    files: ["src/lib/logger.ts", "functions/**/*.{ts,tsx,js,jsx}", "netlify/functions/**/*.{ts,tsx,js,jsx}"],
     rules: {
       "no-console": "off",
     },

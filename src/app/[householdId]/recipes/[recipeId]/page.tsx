@@ -1,4 +1,5 @@
 import { db } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 import { Recipe } from '@/lib/types';
 import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -43,18 +44,28 @@ export async function generateMetadata(
 export default async function RecipeDetailPage({ params }: Props) {
   const { householdId, recipeId } = await params;
   
-  const recipeSnapshot = await db
-    .collection('recipes')
-    .doc(recipeId)
-    .get();
+  logger.info('Recipe detail page viewed', { householdId, recipeId }, 'page.view');
+
+  let recipeSnapshot;
+  try {
+    recipeSnapshot = await db
+      .collection('recipes')
+      .doc(recipeId)
+      .get();
+  } catch (error) {
+    logger.error(error, { message: 'Failed to fetch recipe', householdId, recipeId });
+    throw error;
+  }
 
   if (!recipeSnapshot.exists) {
+    logger.warn('Recipe not found', { householdId, recipeId });
     notFound();
   }
 
   const recipe = recipeSnapshot.data() as Recipe;
 
   if (recipe.accountId !== householdId) {
+    logger.warn('Recipe does not belong to household', { householdId, recipeId, actualAccountId: recipe.accountId });
     notFound();
   }
 

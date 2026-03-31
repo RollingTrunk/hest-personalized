@@ -1,5 +1,7 @@
+/* eslint-disable no-restricted-syntax -- OG images use Satori renderer which doesn't support CSS variables */
 import { ImageResponse } from 'next/og';
 import { db } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 import { Recipe } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -18,33 +20,42 @@ export default async function Image({
 }) {
   const { householdId, recipeId } = await params;
 
-  // Fetch recipe
-  const recipeSnapshot = await db
-    .collection('recipes')
-    .doc(recipeId)
-    .get();
 
   let title = 'Recipe Not Found';
   let description = 'This recipe is unavailable or does not exist.';
   let type = '';
   let metaInfo = '';
 
-  if (recipeSnapshot.exists) {
-    const recipe = recipeSnapshot.data() as Recipe;
-    if (recipe.accountId === householdId) {
-      title = recipe.name;
-      description = recipe.description || `A delicious recipe shared on Hest.`;
-      type = recipe.type ? recipe.type.toUpperCase() : 'RECIPE';
-      
-      const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
-      const stats = [];
-      if (recipe.prepTimeMinutes) stats.push(`Prep: ${recipe.prepTimeMinutes}m`);
-      if (recipe.cookTimeMinutes) stats.push(`Cook: ${recipe.cookTimeMinutes}m`);
-      if (totalTime) stats.push(`Total: ${totalTime}m`);
-      if (recipe.servings) stats.push(`Serves: ${recipe.servings}`);
-      
-      metaInfo = stats.join('  •  ');
+  try {
+    const recipeSnapshot = await db
+      .collection('recipes')
+      .doc(recipeId)
+      .get();
+
+    if (recipeSnapshot.exists) {
+      const recipe = recipeSnapshot.data() as Recipe;
+      if (recipe.accountId === householdId) {
+        title = recipe.name;
+        description = recipe.description || `A delicious recipe shared on Hest.`;
+        type = recipe.type ? recipe.type.toUpperCase() : 'RECIPE';
+        
+        const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
+        const stats = [];
+        if (recipe.prepTimeMinutes) stats.push(`Prep: ${recipe.prepTimeMinutes}m`);
+        if (recipe.cookTimeMinutes) stats.push(`Cook: ${recipe.cookTimeMinutes}m`);
+        if (totalTime) stats.push(`Total: ${totalTime}m`);
+        if (recipe.servings) stats.push(`Serves: ${recipe.servings}`);
+        
+        metaInfo = stats.join('  •  ');
+        logger.info('OG image generated', { recipeId, recipeName: recipe.name }, 'og');
+      } else {
+        logger.warn('OG image: recipe/household mismatch', { householdId, recipeId });
+      }
+    } else {
+      logger.warn('OG image: recipe not found', { recipeId });
     }
+  } catch {
+    logger.warn('OG image: fetch failed, using fallback', { householdId, recipeId });
   }
 
   return new ImageResponse(

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.46.0",
     "firebase-admin": "^13.7.0",
     "next": "16.2.1",
     "next-themes": "^0.4.6",

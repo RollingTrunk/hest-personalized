@@ -1,4 +1,5 @@
 import { db } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 import { Account, Recipe } from '@/lib/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -14,15 +15,25 @@ interface PageProps {
 export default async function RecipeIndexPage({ params }: PageProps) {
   const { householdId } = await params;
   
-  const accountDoc = await db.collection('accounts').doc(householdId).get();
+  logger.info('Recipe index page viewed', { householdId }, 'page.view');
+
+  let accountDoc;
+  try {
+    accountDoc = await db.collection('accounts').doc(householdId).get();
+  } catch (error) {
+    logger.error(error, { message: 'Failed to fetch account for recipe index', householdId });
+    throw error;
+  }
   
   if (!accountDoc.exists) {
+    logger.warn('Household not found for recipe index', { householdId });
     notFound();
   }
   
   const accountData = accountDoc.data() as Account;
   
   if (!accountData.publicProfileEnabled) {
+    logger.info('Public profile disabled, blocking recipe index', { householdId }, 'access');
     return (
       <div style={{
         padding: '80px 0',
@@ -38,8 +49,14 @@ export default async function RecipeIndexPage({ params }: PageProps) {
     );
   }
   
-  const recipesSnapshot = await db.collection('recipes').where('accountId', '==', householdId).get();
-  const recipes = recipesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe));
+  let recipes: Recipe[] = [];
+  try {
+    const recipesSnapshot = await db.collection('recipes').where('accountId', '==', householdId).get();
+    recipes = recipesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe));
+  } catch (error) {
+    logger.error(error, { message: 'Failed to fetch recipes', householdId });
+    throw error;
+  }
   
   return (
     <div style={{ paddingTop: '48px', paddingBottom: '48px' }}>

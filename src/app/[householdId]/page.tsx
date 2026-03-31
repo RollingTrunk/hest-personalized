@@ -1,4 +1,5 @@
 import { db } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 import { Account } from '@/lib/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -14,9 +15,18 @@ interface Props {
 export default async function HouseholdPage({ params }: Props) {
   const { householdId } = await params;
   
-  const accountDoc = await db.collection('accounts').doc(householdId).get();
+  logger.info('Household page viewed', { householdId }, 'page.view');
+
+  let accountDoc;
+  try {
+    accountDoc = await db.collection('accounts').doc(householdId).get();
+  } catch (error) {
+    logger.error(error, { message: 'Failed to fetch account', householdId });
+    throw error;
+  }
   
   if (!accountDoc.exists) {
+    logger.warn('Household not found', { householdId });
     notFound();
   }
   
