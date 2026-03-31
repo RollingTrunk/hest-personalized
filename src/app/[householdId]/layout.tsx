@@ -33,9 +33,9 @@ export default function HouseholdLayout({
             <Image
               src="/hest-scheme-adaptive.png"
               alt="Hest"
-              width={28}
-              height={28}
-              style={{ display: 'block' }}
+              width={475}
+              height={542}
+              style={{ display: 'block', width: '28px', height: 'auto' }}
             />
             <span 
               className={audiowide.className}
@@ -80,9 +80,9 @@ export default function HouseholdLayout({
           <Image
             src="/hest-scheme-adaptive.png"
             alt="Hest"
-            width={48}
-            height={48}
-            style={{ display: 'block', margin: '0 auto 16px' }}
+            width={475}
+            height={542}
+            style={{ display: 'block', width: '48px', height: 'auto', margin: '0 auto 16px' }}
           />
           <h3 style={{
             fontSize: '1.25rem',
