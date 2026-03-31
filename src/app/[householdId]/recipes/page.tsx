@@ -22,7 +22,7 @@ export default async function RecipeIndexPage({ params }: PageProps) {
     accountDoc = await db.collection('accounts').doc(householdId).get();
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch account for recipe index', householdId });
-    throw error;
+    notFound();
   }
   
   if (!accountDoc.exists) {
@@ -55,7 +55,7 @@ export default async function RecipeIndexPage({ params }: PageProps) {
     recipes = recipesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe));
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch recipes', householdId });
-    throw error;
+    notFound();
   }
   
   return (

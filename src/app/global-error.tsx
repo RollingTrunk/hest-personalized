@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable no-restricted-syntax -- standalone HTML without CSS variable access */
-import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -12,7 +12,9 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    logger.error(error, { message: "Unhandled client error", digest: error.digest });
+    Sentry.captureException(error, {
+      extra: { digest: error.digest, boundary: "global" },
+    });
   }, [error]);
 
   return (

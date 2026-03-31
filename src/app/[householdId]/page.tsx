@@ -22,7 +22,7 @@ export default async function HouseholdPage({ params }: Props) {
     accountDoc = await db.collection('accounts').doc(householdId).get();
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch account', householdId });
-    throw error;
+    notFound();
   }
   
   if (!accountDoc.exists) {

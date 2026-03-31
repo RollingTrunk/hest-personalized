@@ -1,8 +1,9 @@
 import { db } from '@/lib/firebase-admin';
 import { logger } from '@/lib/logger';
-import { Recipe } from '@/lib/types';
+import { Account, Recipe } from '@/lib/types';
 import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,26 +20,31 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { householdId, recipeId } = await params;
   
-  const recipeDoc = await db.collection('recipes').doc(recipeId).get();
-  
-  if (!recipeDoc.exists) {
+  try {
+    const recipeDoc = await db.collection('recipes').doc(recipeId).get();
+    
+    if (!recipeDoc.exists) {
+      return { title: 'Recipe Not Found - Hest' };
+    }
+    
+    const recipe = recipeDoc.data() as Recipe;
+    
+    if (recipe.accountId !== householdId) {
+      return { title: 'Recipe Not Found - Hest' };
+    }
+    
+    return {
+      title: `${recipe.name} - Hest`,
+      description: recipe.description || `A delicious ${recipe.type} recipe shared on Hest.`,
+      openGraph: {
+        images: recipe.imageUrl ? [recipe.imageUrl] : [],
+        type: 'article',
+      },
+    };
+  } catch (error) {
+    logger.error(error, { message: 'Failed to generate metadata for recipe', householdId, recipeId });
     return { title: 'Recipe Not Found - Hest' };
   }
-  
-  const recipe = recipeDoc.data() as Recipe;
-  
-  if (recipe.accountId !== householdId) {
-    return { title: 'Recipe Not Found - Hest' };
-  }
-  
-  return {
-    title: `${recipe.name} - Hest`,
-    description: recipe.description || `A delicious ${recipe.type} recipe shared on Hest.`,
-    openGraph: {
-      images: recipe.imageUrl ? [recipe.imageUrl] : [],
-      type: 'article',
-    },
-  };
 }
 
 export default async function RecipeDetailPage({ params }: Props) {
@@ -54,7 +60,7 @@ export default async function RecipeDetailPage({ params }: Props) {
       .get();
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch recipe', householdId, recipeId });
-    throw error;
+    notFound();
   }
 
   if (!recipeSnapshot.exists) {
@@ -68,6 +74,15 @@ export default async function RecipeDetailPage({ params }: Props) {
     logger.warn('Recipe does not belong to household', { householdId, recipeId, actualAccountId: recipe.accountId });
     notFound();
   }
+
+  let accountDoc;
+  try {
+    accountDoc = await db.collection('accounts').doc(householdId).get();
+  } catch (error) {
+    logger.error(error, { message: 'Failed to fetch account for recipe detail', householdId });
+  }
+  
+  const publicProfileEnabled = accountDoc?.exists ? (accountDoc.data() as Account).publicProfileEnabled : false;
 
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
 
@@ -94,6 +109,30 @@ export default async function RecipeDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      {/* Back button if public profile is enabled */}
+      {publicProfileEnabled && (
+        <div style={{ marginBottom: '24px' }}>
+          <Link
+            href={`/${householdId}/recipes`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--muted)',
+              textDecoration: 'none',
+              fontSize: '0.9375rem',
+              fontWeight: 500,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            All Recipes
+          </Link>
+        </div>
+      )}
 
       {/* Title */}
       <h1 style={{
