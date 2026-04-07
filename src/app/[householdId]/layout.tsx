@@ -102,7 +102,7 @@ export default function HouseholdLayout({
             Download Hest to manage your household recipes, meal plans, and more.
           </p>
           <a
-            href="https://apps.apple.com/us/app/hest-household-manager/id6759582460"
+            href="https://apps.apple.com/app/apple-store/id6759582460?pt=128418226&ct=hest-personalized-page&mt=8"
             target="_blank"
             rel="noopener noreferrer"
             style={{
