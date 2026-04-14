@@ -1,11 +1,8 @@
-import { db } from '@/lib/firebase-admin';
 import { logger } from '@/lib/logger';
-import { Account, Recipe } from '@/lib/types';
+import { getAccount, getRecipe } from '@/lib/data';
 import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-
-export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{
@@ -21,13 +18,13 @@ export async function generateMetadata(
   const { householdId, recipeId } = await params;
   
   try {
-    const recipeDoc = await db.collection('recipes').doc(recipeId).get();
+    const result = await getRecipe(recipeId);
     
-    if (!recipeDoc.exists) {
+    if (!result.exists || !result.data) {
       return { title: 'Recipe Not Found - Hest' };
     }
     
-    const recipe = recipeDoc.data() as Recipe;
+    const recipe = result.data;
     
     if (recipe.accountId !== householdId) {
       return { title: 'Recipe Not Found - Hest' };
@@ -52,37 +49,33 @@ export default async function RecipeDetailPage({ params }: Props) {
   
   logger.info('Recipe detail page viewed', { householdId, recipeId }, 'page.view');
 
-  let recipeSnapshot;
+  let recipeResult;
   try {
-    recipeSnapshot = await db
-      .collection('recipes')
-      .doc(recipeId)
-      .get();
+    recipeResult = await getRecipe(recipeId);
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch recipe', householdId, recipeId });
     notFound();
   }
 
-  if (!recipeSnapshot.exists) {
+  if (!recipeResult.exists || !recipeResult.data) {
     logger.warn('Recipe not found', { householdId, recipeId });
     notFound();
   }
 
-  const recipe = recipeSnapshot.data() as Recipe;
+  const recipe = recipeResult.data;
 
   if (recipe.accountId !== householdId) {
     logger.warn('Recipe does not belong to household', { householdId, recipeId, actualAccountId: recipe.accountId });
     notFound();
   }
 
-  let accountDoc;
+  let publicProfileEnabled = false;
   try {
-    accountDoc = await db.collection('accounts').doc(householdId).get();
+    const account = await getAccount(householdId);
+    publicProfileEnabled = account.exists && account.data?.publicProfileEnabled === true;
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch account for recipe detail', householdId });
   }
-  
-  const publicProfileEnabled = accountDoc?.exists ? (accountDoc.data() as Account).publicProfileEnabled : false;
 
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
 

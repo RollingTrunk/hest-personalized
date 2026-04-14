@@ -1,10 +1,7 @@
-import { db } from '@/lib/firebase-admin';
 import { logger } from '@/lib/logger';
-import { Account } from '@/lib/types';
+import { getAccount } from '@/lib/data';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-
-export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{
@@ -17,20 +14,20 @@ export default async function HouseholdPage({ params }: Props) {
   
   logger.info('Household page viewed', { householdId }, 'page.view');
 
-  let accountDoc;
+  let account;
   try {
-    accountDoc = await db.collection('accounts').doc(householdId).get();
+    account = await getAccount(householdId);
   } catch (error) {
     logger.error(error, { message: 'Failed to fetch account', householdId });
     notFound();
   }
   
-  if (!accountDoc.exists) {
+  if (!account.exists || !account.data) {
     logger.warn('Household not found', { householdId });
     notFound();
   }
   
-  const accountData = accountDoc.data() as Account;
+  const accountData = account.data;
   
   return (
     <div style={{

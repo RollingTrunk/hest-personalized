@@ -177,7 +177,7 @@ export default function HouseholdLayout({
             color: 'var(--muted)',
             fontSize: '0.8125rem',
           }}>
-            © {new Date().getFullYear()} Hest. All rights reserved.
+            © 2026 Hest. All rights reserved.
           </p>
         </div>
       </footer>

@@ -1,8 +1,7 @@
 /* eslint-disable no-restricted-syntax -- OG images use Satori renderer which doesn't support CSS variables */
 import { ImageResponse } from 'next/og';
-import { db } from '@/lib/firebase-admin';
+import { getRecipe } from '@/lib/data';
 import { logger } from '@/lib/logger';
-import { Recipe } from '@/lib/types';
 
 export const runtime = 'nodejs';
 export const alt = 'Recipe shared on Hest';
@@ -27,13 +26,10 @@ export default async function Image({
   let metaInfo = '';
 
   try {
-    const recipeSnapshot = await db
-      .collection('recipes')
-      .doc(recipeId)
-      .get();
+    const result = await getRecipe(recipeId);
 
-    if (recipeSnapshot.exists) {
-      const recipe = recipeSnapshot.data() as Recipe;
+    if (result.exists && result.data) {
+      const recipe = result.data;
       if (recipe.accountId === householdId) {
         title = recipe.name;
         description = recipe.description || `A delicious recipe shared on Hest.`;
