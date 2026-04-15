@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { getAccount, getRecipe } from '@/lib/data';
+import { parseRecipeDirections } from '@/lib/recipe-parser';
 import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -253,49 +254,77 @@ export default async function RecipeDetailPage({ params }: Props) {
         }}>
           Directions
         </h2>
-        <ol style={{
-          listStyle: 'none',
-          padding: 0,
-          margin: 0,
-          counterReset: 'step',
-        }}>
-          {recipe.directions.split('\n').filter(d => d.trim()).map((step, idx) => (
-            <li
-              key={idx}
-              style={{
-                display: 'flex',
-                gap: '16px',
-                marginBottom: '24px',
-                alignItems: 'flex-start',
-              }}
-            >
-              <span style={{
-                flexShrink: 0,
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                background: 'var(--accent-subtle)',
-                color: 'var(--accent)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                marginTop: '1px',
-              }}>
-                {idx + 1}
-              </span>
-              <p style={{
-                fontSize: '0.9375rem',
-                lineHeight: 1.7,
-                margin: 0,
-                paddingTop: '3px',
-              }}>
-                {step.trim().replace(/^\d+\.\s*/, '')}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {parseRecipeDirections(recipe.directions).map((block, idx) => {
+            if (block.type === 'heading') {
+              return (
+                <h3 
+                  key={idx}
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: 700,
+                    marginBottom: '12px',
+                    marginTop: idx === 0 ? '0' : '20px',
+                    color: 'var(--foreground)'
+                  }}
+                >
+                  {block.text}
+                </h3>
+              );
+            }
+            if (block.type === 'paragraph') {
+              return (
+                <p 
+                  key={idx}
+                  style={{
+                    fontSize: '0.9375rem',
+                    lineHeight: 1.7,
+                    margin: 0,
+                    marginBottom: '16px',
+                  }}
+                >
+                  {block.text}
+                </p>
+              );
+            }
+            return (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  gap: '16px',
+                  marginBottom: '24px',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <span style={{
+                  flexShrink: 0,
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  background: 'var(--accent-subtle)',
+                  color: 'var(--accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.8125rem',
+                  marginTop: '1px',
+                }}>
+                  {block.stepNumber}
+                </span>
+                <p style={{
+                  fontSize: '0.9375rem',
+                  lineHeight: 1.7,
+                  margin: 0,
+                  paddingTop: '3px',
+                }}>
+                  {block.text}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* Source */}
