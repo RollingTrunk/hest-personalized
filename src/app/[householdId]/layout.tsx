@@ -1,12 +1,6 @@
 import Image from 'next/image';
-import { Audiowide } from 'next/font/google';
 import { FaInstagram, FaThreads, FaTiktok } from 'react-icons/fa6';
 import { ThemeToggle } from '@/components/theme-toggle';
-
-const audiowide = Audiowide({
-  weight: '400',
-  subsets: ['latin'],
-});
 
 export default function HouseholdLayout({
   children,
@@ -37,18 +31,20 @@ export default function HouseholdLayout({
               height={542}
               style={{ display: 'block', width: '28px', height: 'auto' }}
             />
-            <span 
-              className={audiowide.className}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="7 4 301 71"
+              fill="var(--logo-text)"
+              aria-label="HEST"
+              role="img"
               style={{
-                fontSize: '1.25rem', // Slightly larger to match the icon presence
-                letterSpacing: '-0.02em',
-                lineHeight: 1,
-                marginTop: '8px', // Visual nudge down to perfectly optical-center alongside the 28px icon
-                color: 'var(--logo-text)',
+                height: '0.9rem',
+                width: 'auto',
+                marginTop: '8px',
               }}
             >
-              HEST
-            </span>
+              <path d="M20.17 4.98L20.17 33.59L64.75 33.59L64.75 4.98L77.44 4.98L77.44 75L64.75 75L64.75 46.39L20.17 46.39L20.17 75L7.47 75L7.47 4.98L20.17 4.98ZM149.85 33.59L149.85 46.39L109.77 46.39L109.77 33.59L149.85 33.59ZM155.57 62.30L155.57 75L109.77 75Q107.13 75 104.00 74.07Q100.88 73.14 98.22 71.02Q95.56 68.90 93.77 65.50Q91.99 62.11 91.99 57.18L91.99 57.18L91.99 11.38Q91.99 10.06 92.48 8.89Q92.97 7.71 93.82 6.84Q94.68 5.96 95.85 5.47Q97.02 4.98 98.39 4.98L98.39 4.98L155.57 4.98L155.57 17.68L104.69 17.68L104.69 57.18Q104.69 59.67 106.01 60.99Q107.32 62.30 109.86 62.30L109.86 62.30L155.57 62.30ZM234.86 54.39L234.86 54.39Q234.86 58.15 233.91 61.16Q232.96 64.16 231.40 66.46Q229.83 68.75 227.73 70.36Q225.63 71.97 223.39 73.00Q221.14 74.02 218.82 74.51Q216.50 75 214.45 75L214.45 75L165.48 75L165.48 62.30L214.45 62.30Q218.12 62.30 220.14 60.16Q222.17 58.01 222.17 54.39L222.17 54.39Q222.17 52.64 221.63 51.17Q221.09 49.71 220.09 48.63Q219.09 47.56 217.65 46.97Q216.21 46.39 214.45 46.39L214.45 46.39L185.25 46.39Q182.18 46.39 178.61 45.29Q175.05 44.19 172.00 41.75Q168.95 39.31 166.92 35.35Q164.89 31.40 164.89 25.68L164.89 25.68Q164.89 19.97 166.92 16.04Q168.95 12.11 172.00 9.64Q175.05 7.18 178.61 6.08Q182.18 4.98 185.25 4.98L185.25 4.98L228.47 4.98L228.47 17.68L185.25 17.68Q181.64 17.68 179.61 19.87Q177.59 22.07 177.59 25.68L177.59 25.68Q177.59 29.35 179.61 31.47Q181.64 33.59 185.25 33.59L185.25 33.59L214.45 33.59L214.55 33.59Q216.60 33.64 218.90 34.16Q221.19 34.67 223.46 35.74Q225.73 36.82 227.78 38.45Q229.83 40.09 231.42 42.38Q233.01 44.68 233.94 47.66Q234.86 50.63 234.86 54.39ZM307.96 4.98L307.96 17.68L279.98 17.68L279.98 75L267.29 75L267.29 17.68L239.26 17.68L239.26 4.98L307.96 4.98Z"/>
+            </svg>
           </div>
           <ThemeToggle />
         </div>

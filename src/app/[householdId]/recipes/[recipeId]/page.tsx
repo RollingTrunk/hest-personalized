@@ -91,14 +91,16 @@ export default async function RecipeDetailPage({ params }: Props) {
     totalTime: `PT${totalTime}M`,
     recipeYield: recipe.servings ? `${recipe.servings} servings` : undefined,
     recipeIngredient: recipe.ingredients.map(i => `${i.quantity} ${i.unit} ${i.name}`),
-    recipeInstructions: recipe.directions.split('\n').filter(d => d.trim()).map(step => ({
-      '@type': 'HowToStep',
-      text: step.trim()
-    })),
+    recipeInstructions: parseRecipeDirections(recipe.directions)
+      .filter(block => block.type === 'step')
+      .map(step => ({
+        '@type': 'HowToStep',
+        text: step.text.trim()
+      })),
   };
 
   return (
-    <article style={{ paddingTop: '48px', paddingBottom: '48px' }}>
+    <article className="py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -106,18 +108,10 @@ export default async function RecipeDetailPage({ params }: Props) {
 
       {/* Back button if public profile is enabled */}
       {publicProfileEnabled && (
-        <div style={{ marginBottom: '24px' }}>
+        <div className="mb-6">
           <Link
             href={`/${householdId}/recipes`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: 'var(--muted)',
-              textDecoration: 'none',
-              fontSize: '0.9375rem',
-              fontWeight: 500,
-            }}
+            className="inline-flex items-center gap-1.5 text-[var(--muted)] no-underline text-[0.9375rem] font-medium"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -129,53 +123,34 @@ export default async function RecipeDetailPage({ params }: Props) {
       )}
 
       {/* Title */}
-      <h1 style={{
-        fontSize: '2rem',
-        fontWeight: 800,
-        lineHeight: 1.2,
-        marginBottom: '12px',
-      }}>
+      <h1 className="text-3xl font-extrabold leading-[1.2] mb-3">
         {recipe.name}
       </h1>
 
       {/* Description */}
       {recipe.description && (
-        <p style={{
-          fontSize: '1.125rem',
-          color: 'var(--muted)',
-          lineHeight: 1.6,
-          marginBottom: '24px',
-        }}>
+        <p className="text-lg text-[var(--muted)] leading-relaxed mb-6">
           {recipe.description}
         </p>
       )}
 
       {/* Meta bar */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '20px',
-        fontSize: '0.875rem',
-        color: 'var(--muted)',
-        paddingBottom: '24px',
-        borderBottom: '1px solid var(--border)',
-        marginBottom: '32px',
-      }}>
+      <div className="flex flex-wrap gap-5 text-sm text-[var(--muted)] pb-6 border-b border-[var(--border)] mb-8">
         <div>
-          <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>Prep</span>{' '}
+          <span className="font-semibold text-[var(--foreground)]">Prep</span>{' '}
           {recipe.prepTimeMinutes} min
         </div>
         <div>
-          <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>Cook</span>{' '}
+          <span className="font-semibold text-[var(--foreground)]">Cook</span>{' '}
           {recipe.cookTimeMinutes} min
         </div>
         <div>
-          <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>Total</span>{' '}
+          <span className="font-semibold text-[var(--foreground)]">Total</span>{' '}
           {totalTime} min
         </div>
         {recipe.servings && (
           <div>
-            <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>Servings</span>{' '}
+            <span className="font-semibold text-[var(--foreground)]">Servings</span>{' '}
             {recipe.servings}
           </div>
         )}
@@ -183,61 +158,29 @@ export default async function RecipeDetailPage({ params }: Props) {
 
       {/* Image */}
       {recipe.imageUrl && (
-        <div style={{
-          borderRadius: '8px',
-          overflow: 'hidden',
-          marginBottom: '40px',
-          background: 'var(--surface)',
-        }}>
+        <div className="rounded-lg overflow-hidden mb-10 bg-[var(--surface)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={recipe.imageUrl}
             alt={recipe.name}
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              maxHeight: '420px',
-              objectFit: 'cover',
-            }}
+            className="w-full h-auto block max-h-[420px] object-cover"
           />
         </div>
       )}
 
       {/* Ingredients */}
-      <section style={{ marginBottom: '40px' }}>
-        <h2 style={{
-          fontSize: '1.25rem',
-          fontWeight: 700,
-          marginBottom: '16px',
-        }}>
+      <section className="mb-10">
+        <h2 className="text-xl font-bold mb-4">
           Ingredients
         </h2>
-        <ul style={{
-          listStyle: 'none',
-          padding: 0,
-          margin: 0,
-        }}>
+        <ul className="list-none p-0 m-0">
           {recipe.ingredients.map((ingredient, idx) => (
             <li
               key={idx}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                padding: '10px 0',
-                borderBottom: '1px solid var(--border-light)',
-                fontSize: '0.9375rem',
-              }}
+              className="flex justify-between items-baseline py-2.5 border-b border-[var(--border-light)] text-[0.9375rem]"
             >
-              <span style={{ fontWeight: 500 }}>{ingredient.name}</span>
-              <span style={{
-                color: 'var(--muted)',
-                fontSize: '0.875rem',
-                marginLeft: '16px',
-                flexShrink: 0,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
+              <span className="font-medium">{ingredient.name}</span>
+              <span className="text-[var(--muted)] text-sm ml-4 shrink-0 tabular-nums">
                 {ingredient.quantity} {ingredient.unit}
               </span>
             </li>
@@ -246,27 +189,17 @@ export default async function RecipeDetailPage({ params }: Props) {
       </section>
 
       {/* Directions */}
-      <section style={{ marginBottom: '40px' }}>
-        <h2 style={{
-          fontSize: '1.25rem',
-          fontWeight: 700,
-          marginBottom: '20px',
-        }}>
+      <section className="mb-10">
+        <h2 className="text-xl font-bold mb-5">
           Directions
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="flex flex-col">
           {parseRecipeDirections(recipe.directions).map((block, idx) => {
             if (block.type === 'heading') {
               return (
                 <h3 
                   key={idx}
-                  style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 700,
-                    marginBottom: '12px',
-                    marginTop: idx === 0 ? '0' : '20px',
-                    color: 'var(--foreground)'
-                  }}
+                  className={`text-lg font-bold mb-3 text-[var(--foreground)] ${idx === 0 ? 'mt-0' : 'mt-5'}`}
                 >
                   {block.text}
                 </h3>
@@ -276,12 +209,7 @@ export default async function RecipeDetailPage({ params }: Props) {
               return (
                 <p 
                   key={idx}
-                  style={{
-                    fontSize: '0.9375rem',
-                    lineHeight: 1.7,
-                    margin: 0,
-                    marginBottom: '16px',
-                  }}
+                  className="text-[0.9375rem] leading-[1.7] m-0 mb-4"
                 >
                   {block.text}
                 </p>
@@ -290,35 +218,12 @@ export default async function RecipeDetailPage({ params }: Props) {
             return (
               <div
                 key={idx}
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  marginBottom: '24px',
-                  alignItems: 'flex-start',
-                }}
+                className="flex gap-4 mb-6 items-start"
               >
-                <span style={{
-                  flexShrink: 0,
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: 'var(--accent-subtle)',
-                  color: 'var(--accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '0.8125rem',
-                  marginTop: '1px',
-                }}>
+                <span className="shrink-0 w-7 h-7 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)] flex items-center justify-center font-bold text-[0.8125rem] mt-[1px]">
                   {block.stepNumber}
                 </span>
-                <p style={{
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.7,
-                  margin: 0,
-                  paddingTop: '3px',
-                }}>
+                <p className="text-[0.9375rem] leading-[1.7] m-0 pt-[3px]">
                   {block.text}
                 </p>
               </div>
@@ -329,22 +234,12 @@ export default async function RecipeDetailPage({ params }: Props) {
 
       {/* Source */}
       {recipe.sourceUrl && (
-        <div style={{
-          paddingTop: '24px',
-          borderTop: '1px solid var(--border-light)',
-        }}>
+        <div className="pt-6 border-t border-[var(--border-light)]">
           <a
             href={recipe.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              color: 'var(--accent)',
-              fontWeight: 500,
-              fontSize: '0.875rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
+            className="text-[var(--accent)] font-medium text-sm inline-flex items-center gap-1"
           >
             View original source
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
